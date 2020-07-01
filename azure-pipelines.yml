@@ -1,3 +1,9 @@
+# Below pipeline YAML file is for deploying Kubernetes Cluster.
+# This YAML file is from MSLEARN course Deploy applications with Azure DevOps, module: Automate multi-container Kubernetes deployments with Azure Pipelines
+# Docs  Learn-->Browse-->Deploy applications with Azure DevOps-->Automate multi-container Kubernetes deployments with Azure Pipelines
+# https://docs.microsoft.com/en-us/learn/modules/deploy-kubernetes/4-deploy-kubernetes
+
+
 trigger:
 - 'master'
 
@@ -39,6 +45,8 @@ stages:
         tags: |
           $(tag)
 
+      # since deployment tasks happen in their own Deploy stage, it will run on a completely fresh environment, probably even on a different agent. 
+      # We should be sure to publish anything this stage produces that the other stage will need. PublishBuildArtifacts@1 task is for publishing. It's so common that there's even a shorthand for it, 'publish'. Hence the publish step is needed below.
     - publish: '$(Build.SourcesDirectory)/manifests'
       artifact: manifests
 
