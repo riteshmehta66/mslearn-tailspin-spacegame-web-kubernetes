@@ -66,8 +66,19 @@ stages:
       runOnce:
         deploy:
           steps:
+            # download the manifest artifacts published earlier using the DownloadBuildArtifacts@0 task. There is a shorthand for that task a.k.a. 'download:' as shown below.
+            # the 'current' specifier to indicate that we want the artifact from the current run of the pipeline.
+
           - download: current
             artifact: manifests
+
+            # The KubernetesManifest@0 task is designed to manage all of the mainstream deployment operations required for Kubernetes. It supports multiple action options that range from creating secrets to deploying images. In this case, the createSecret action will be used, along with the additional parameters defined below.
+            # action indicates the feature to run. In this case, createSecret creates the shared secret.
+            # secretName specifies the name of the secret to create.
+            #  dockerRegistryEndpoint specifies the name of the Azure Container Services connection.
+            #  kubernetesServiceConnection specifies the name of the Azure Kubernetes Services connection.
+            #  namespace specifies the Kubernetes namespace this action applies to.
+            # You can learn more about the flexibility of this task in the Kubernetes manifest task  documentation at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/kubernetes-manifest
           - task: KubernetesManifest@0
             displayName: Create imagePullSecret
             inputs:
@@ -77,6 +88,12 @@ stages:
               kubernetesServiceConnection: 'Kubernetes Cluster Connection'
               namespace: 'default'
 
+            # The final step is to trigger the deployment of our updates images to the Kubernetes cluster. Based on the documentation, it looks like we can use the same task, but with a different action and parameters.
+            #  action indicates the feature to run. In this case, deploy does exactly what it sounds like.
+            #  kubernetesServiceConnection specifies the name of the Azure Kubernetes Services connection.
+            #  namespace specifies the Kubernetes namespace this action applies to.
+            #  imagePullSecrets specifies the list of secrets needed to pull from the container registry.
+            #  containers specifies the list of container images to deploy.  
           - task: KubernetesManifest@0
             displayName: Deploy to Kubernetes cluster
             inputs:
